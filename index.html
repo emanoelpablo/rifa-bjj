@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rifa CBJJ - Emanoel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a; /* Fundo Escuro */
+            --card-bg: #1e293b;  /* Cartão Cinza Azulado */
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent: #3b82f6;   /* Azul Jiu-Jitsu */
+            --success: #22c55e;  /* Verde Neon */
+            --sold: #334155;     /* Cinza Escuro para vendidos (menos destaque) */
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 20px 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: var(--card-bg);
+            padding: 30px 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            border: 1px solid #334155;
+        }
+
+        /* --- NOVO CSS PARA INFO E PRÊMIOS --- */
+        .info-badge {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+
+        .badge-item {
+            background: rgba(59, 130, 246, 0.15); /* Azul transparente */
+            border: 1px solid var(--accent);
+            color: #bfdbfe;
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .prizes-box {
+            background: #1e293b; /* Fundo do cartão */
+            border: 1px dashed #475569;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            text-align: left; /* Lista alinhada à esquerda fica mais bonita */
+        }
+
+        .prizes-title {
+            color: var(--success);
+            text-align: center;
+            text-transform: uppercase;
+            font-weight: 800;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1rem;
+            letter-spacing: 1px;
+        }
+
+        .prizes-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .prizes-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid #334155;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .prizes-list li:last-child { border-bottom: none; }
+        /* ------------------------------------- */
+
+        h1 {
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+            margin-bottom: 5px;
+            background: linear-gradient(to right, #60a5fa, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.5; }
+
+        /* Barra de Progresso */
+        .progress-container {
+            background: #0f172a;
+            border-radius: 10px;
+            height: 12px;
+            width: 100%;
+            margin: 20px 0;
+            overflow: hidden;
+            position: relative;
+        }
+        .progress-bar {
+            background: linear-gradient(90deg, #22c55e, #4ade80);
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s ease;
+            box-shadow: 0 0 10px #22c55e80;
+        }
+        .meta-text { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 25px; }
+
+        /* Grid e Botões */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr); /* 5 por linha no celular */
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .number-btn {
+            aspect-ratio: 1;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .number-btn.free {
+            background-color: rgba(34, 197, 94, 0.1);
+            border: 2px solid var(--success);
+            color: var(--success);
+        }
+        
+        .number-btn.free:hover {
+            background-color: var(--success);
+            color: #000;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(34, 197, 94, 0.4);
+        }
+
+        .number-btn.sold {
+            background-color: var(--sold);
+            color: #64748b;
+            cursor: not-allowed;
+            opacity: 0.6;
+            border: 2px solid transparent;
+        }
+
+        /* Modal Moderno */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 20px;
+            border: 1px solid #475569;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            color: white;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        .pix-box {
+            background: #0f172a;
+            padding: 15px;
+            border-radius: 8px;
+            word-break: break-all;
+            margin: 20px 0;
+            font-family: monospace;
+            border: 1px dashed #475569;
+            color: #cbd5e1;
+        }
+
+        .btn-copy {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            width: 100%;
+            font-size: 1rem;
+        }
+        
+        #whatsappLink { display: block; margin-top: 15px; color: var(--success); }
+        .close { float: right; cursor: pointer; font-size: 1.5rem; margin-top: -10px; color: #94a3b8; }
+        .loading { color: var(--accent); font-weight: bold; margin: 20px 0; }
+
+        /* --- NOVO CSS PARA LAYOUT LADO A LADO --- */
+        .content-wrapper {
+            display: flex;
+            flex-wrap: wrap; /* Permite quebrar linha em telas pequenas */
+            gap: 25px;
+            justify-content: center;
+            align-items: flex-start; /* Alinha os blocos ao topo */
+            margin-top: 30px;
+            width: 100%;
+        }
+
+        .prizes-box {
+            flex: 1 1 280px; /* Flexível: cresce, encolhe, largura base de 280px */
+            max-width: 350px;
+            margin-bottom: 0; /* Remove margem inferior para não atrapalhar o lado a lado */
+            background: #1e293b;
+            border: 1px solid #334155;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: left;
+            height: fit-content; /* Altura se ajusta ao conteúdo */
+        }
+
+        .grid-section {
+            flex: 2 1 300px; /* Ocupa mais espaço horizontal que a lista de prêmios */
+            width: 100%;
+            max-width: 500px; /* Limita a largura para não ficar muito esticado */
+        }
+
+        /* Grid mais compacto para os números maiores */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(55px, 1fr)); /* Botões um pouco menores */
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .number-btn {
+            aspect-ratio: 1;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem; /* Fonte um pouco menor para caber 3 dígitos */
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Responsividade: em celulares, empilha um sobre o outro */
+        @media (max-width: 768px) {
+            .content-wrapper {
+                flex-direction: column;
+                align-items: center;
+            }
+            .prizes-box, .grid-section {
+                max-width: 100%;
+            }
+        }
+        /* ------------------------------------- */
+    </style>
+</head>
+<body>
+
+    <h1>RIFA SOLIDÁRIA <br><span style="font-size: 0.6em; color: #94a3b8; font-weight: 400;">BRASILEIRO DE JIU-JITSU</span></h1>
+        
+        <p>
+            Todo o valor arrecadado custeará a viagem da equipe <strong>BL JIU-JITSU</strong>.
+        </p>
+
+        <div class="info-badge">
+            <div class="badge-item">📅 Sorteio: 01/04/2026</div>
+            <div class="badge-item">💰 Valor: R$ 10,00</div>
+        </div>
+
+        <div class="content-wrapper">
+            
+            <div class="prizes-box">
+                <div class="prizes-title">🏆 Lista de Prêmios</div>
+                <ul class="prizes-list">
+                    <li>🛋️ 01 Kit Estofado</li>
+                    <li>🩲 01 Kit Íntimo Masculino</li>
+                    <li>👙 01 Kit Íntimo Feminino</li>
+                    <li>💸 01 Pix de R$ 100,00</li>
+                    <li>👕 01 Camisa de Passeio</li>
+                    <li>🥋 01 Mês de Aulas Jiu-Jitsu</li>
+                </ul>
+            </div>
+
+            <div class="grid-section">
+                <div class="progress-container">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <div class="meta-text">
+                    <span id="percentText">0%</span> da meta batida!
+                </div>
+
+                <div class="status-legend">
+                    <span><span class="dot free"></span>Disponível</span>
+                    <span><span class="dot sold"></span>Vendido</span>
+                </div>
+
+                <div id="loadingMsg" class="loading">Carregando rifa...</div>
+                <div class="grid" id="rifaGrid"></div>
+            </div>
+        </div>
+
+    <div class="modal" id="payModal">
+        <div class="modal-content">
+            <span class="close" id="closeBtn">&times;</span>
+            <h2>Número <span id="selectedNum"></span></h2>
+            <p>Para confirmar, faça o PIX e envie o comprovante.</p>
+            <div class="pix-box" id="pixKey">Carregando PIX...</div>
+            <button class="btn-copy" id="copyBtn">Copiar Chave PIX</button>
+            <br><br>
+            <a href="#" id="whatsappLink" style="text-decoration: none; color: #2563eb; font-weight: bold;">Enviar Comprovante no WhatsApp</a>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        // --- COLE AQUI O CÓDIGO QUE VOCÊ COPIOU DO FIREBASE (PASSO 2) ---
+        // Lembre-se de adicionar a linha databaseURL se ela não vier automática!
+        const firebaseConfig = {
+        apiKey: "AIzaSyBEMpB2pKJ9kukNrNbxfNGM0rs3pHbj990",
+        authDomain: "rifa-cbjj.firebaseapp.com",
+        databaseURL: "https://rifa-cbjj-default-rtdb.firebaseio.com/",
+        projectId: "rifa-cbjj",
+        storageBucket: "rifa-cbjj.firebasestorage.app",
+        messagingSenderId: "1067767411104",
+        appId: "1:1067767411104:web:feb2a0540c1c5f21bc74c5",
+        measurementId: "G-RJJLVD1J2Y"
+};
+      
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        const TOTAL_NUMEROS = 30;
+        const NUMERO_INICIAL = 301; // Começa do 301 para dar um ar mais profissional (pode ser 001 se preferir)    
+        const CHAVE_PIX = "a959de09-484a-4336-b6b8-9e029a63963d"; // <--- MUDE SUA CHAVE PIX AQUI
+        const WHATSAPP = "5586981178006"; // <--- MUDE SEU WHATSAPP AQUI
+        const VALOR_RIFA = 10.00;
+
+        const grid = document.getElementById('rifaGrid');
+        const loadingMsg = document.getElementById('loadingMsg');
+        const modal = document.getElementById('payModal');
+        const numSpan = document.getElementById('selectedNum');
+        const pixBox = document.getElementById('pixKey');
+        const whatsLink = document.getElementById('whatsappLink');
+        const closeBtn = document.getElementById('closeBtn');
+        const copyBtn = document.getElementById('copyBtn');
+
+        const rifaRef = ref(db, 'vendidos');
+
+        onValue(rifaRef, (snapshot) => {
+            const dadosVendidos = snapshot.val() || {};
+            renderizarGrid(dadosVendidos);
+            loadingMsg.style.display = 'none';
+        });
+
+       function renderizarGrid(vendidos) {
+            grid.innerHTML = '';
+            
+            // Lógica da Barra de Progresso (continua igual, pois são 30 números no total)
+            const totalVendidos = Object.keys(vendidos).length;
+            const porcentagem = Math.floor((totalVendidos / TOTAL_NUMEROS) * 100);
+            
+            document.getElementById('progressBar').style.width = `${porcentagem}%`;
+            document.getElementById('percentText').textContent = `${porcentagem}%`;
+
+            // Renderização dos Botões - MUDANÇA NO LOOP
+            // O loop agora começa em 301 e vai até 330
+            for (let i = NUMERO_INICIAL; i < NUMERO_INICIAL + TOTAL_NUMEROS; i++) {
+                const btn = document.createElement('button');
+                const isSold = vendidos.hasOwnProperty(i); 
+                const compradorNome = isSold ? vendidos[i] : '';
+
+                btn.className = `number-btn ${isSold ? 'sold' : 'free'}`;
+                btn.textContent = i;
+                
+                if (!isSold) {
+                    btn.onclick = () => openModal(i);
+                } else {
+                    btn.title = `Vendido para: ${compradorNome}`;
+                    btn.onclick = () => alert(`Número ${i} já garantido pelo(a) ${compradorNome}!`);
+                }
+                
+                grid.appendChild(btn);
+            }
+        }
+
+        window.openModal = function(num) {
+            numSpan.textContent = num;
+            pixBox.textContent = CHAVE_PIX;
+            const msg = `Olá Emanoel! Quero o número ${num} da rifa do CBJJ. Segue o comprovante.`;
+            whatsLink.href = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}`;
+            modal.style.display = 'flex';
+        }
+
+        closeBtn.onclick = () => modal.style.display = 'none';
+        window.onclick = (event) => { if (event.target == modal) modal.style.display = 'none'; }
+        copyBtn.onclick = () => { navigator.clipboard.writeText(CHAVE_PIX).then(() => alert("Chave PIX copiada!")); }
+    </script>
+</body>
+</html>
