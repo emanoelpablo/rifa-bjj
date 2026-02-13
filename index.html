@@ -13,7 +13,7 @@
             --text-secondary: #94a3b8;
             --accent: #3b82f6;   
             --success: #22c55e;
-            --selected: #6366f1; /* Cor para números selecionados */
+            --selected: #6366f1; /* Cor Roxa para selecionados */
             --sold: #334155;     
         }
 
@@ -161,26 +161,35 @@
             position: relative;
         }
 
+        /* Estilo Livre */
         .number-btn.free {
             background-color: rgba(34, 197, 94, 0.1);
             border: 2px solid var(--success);
             color: var(--success);
         }
         
-        /* Estilo Selecionado */
+        .number-btn.free:hover {
+            transform: translateY(-2px);
+            background-color: rgba(34, 197, 94, 0.2);
+        }
+
+        /* Estilo Selecionado (Quando clica) */
         .number-btn.selected {
             background-color: var(--selected);
             color: white;
             border: 2px solid white;
             transform: scale(1.05);
             box-shadow: 0 0 15px rgba(99, 102, 241, 0.6);
+            z-index: 10;
         }
 
+        /* Estilo Vendido */
         .number-btn.sold {
             background-color: var(--sold);
             color: #64748b;
             cursor: not-allowed;
             opacity: 0.6;
+            border: 1px solid #334155;
         }
 
         /* Barra Flutuante de Checkout */
@@ -203,6 +212,7 @@
             color: white;
             font-weight: bold;
             cursor: pointer;
+            border: 2px solid rgba(255,255,255,0.1);
         }
 
         .checkout-bar.visible {
@@ -212,7 +222,7 @@
         .checkout-info { display: flex; flex-direction: column; text-align: left; }
         .checkout-total { font-size: 1.1rem; }
         .checkout-count { font-size: 0.8rem; opacity: 0.9; font-weight: normal; }
-        .checkout-btn-text { background: rgba(0,0,0,0.2); padding: 8px 16px; border-radius: 20px; }
+        .checkout-btn-text { background: rgba(0,0,0,0.2); padding: 8px 16px; border-radius: 20px; font-size: 0.9rem;}
 
         /* Modal */
         .modal {
@@ -237,6 +247,7 @@
             text-align: center;
             color: white;
             animation: slideUp 0.3s ease;
+            position: relative;
         }
 
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -251,6 +262,7 @@
             border: 1px dashed #475569;
             color: #cbd5e1;
             font-size: 0.9rem;
+            user-select: all;
         }
 
         .btn-copy {
@@ -263,11 +275,33 @@
             font-weight: 700;
             width: 100%;
             font-size: 1rem;
+            transition: 0.2s;
         }
         
-        #whatsappLink { display: block; margin-top: 15px; color: var(--success); font-weight: bold; text-decoration: none; border: 1px solid var(--success); padding: 10px; border-radius: 8px; transition: 0.2s; }
+        .btn-copy:active { transform: scale(0.98); }
+        
+        #whatsappLink { 
+            display: block; 
+            margin-top: 15px; 
+            color: var(--success); 
+            font-weight: bold; 
+            text-decoration: none; 
+            border: 1px solid var(--success); 
+            padding: 12px; 
+            border-radius: 8px; 
+            transition: 0.2s; 
+        }
         #whatsappLink:hover { background: rgba(34, 197, 94, 0.1); }
-        .close { float: right; cursor: pointer; font-size: 1.5rem; margin-top: -10px; color: #94a3b8; }
+        
+        .close { 
+            position: absolute; 
+            top: 15px; 
+            right: 20px; 
+            cursor: pointer; 
+            font-size: 1.8rem; 
+            color: #94a3b8; 
+            line-height: 1;
+        }
         .loading { color: var(--accent); font-weight: bold; margin: 20px 0; }
 
         /* Layout Responsivo */
@@ -349,15 +383,17 @@
             <span class="close" id="closeBtn">&times;</span>
             <h2 style="margin-top: 0;">Confirmar Compra</h2>
             
-            <p style="color: #cbd5e1;">Você selecionou os números:</p>
-            <div id="selectedNumsList" style="color: var(--accent); font-weight: bold; font-size: 1.2rem; margin-bottom: 15px;"></div>
+            <p style="color: #cbd5e1; font-size: 0.9rem;">Você selecionou os números:</p>
+            <div id="selectedNumsList" style="color: var(--accent); font-weight: bold; font-size: 1.3rem; margin-bottom: 15px; word-wrap: break-word;"></div>
             
-            <p>Valor Total: <strong style="color: var(--success); font-size: 1.2rem;" id="modalTotalValue">R$ 0,00</strong></p>
+            <p>Valor Total: <strong style="color: var(--success); font-size: 1.4rem;" id="modalTotalValue">R$ 0,00</strong></p>
+
+            <p style="font-size: 0.85rem; color: #94a3b8; margin-top: -10px;">Faça o PIX e envie o comprovante.</p>
 
             <div class="pix-box" id="pixKey">Carregando PIX...</div>
             <button class="btn-copy" id="copyBtn">Copiar Chave PIX</button>
             <br>
-            <a href="#" id="whatsappLink">Enviar Comprovante</a>
+            <a href="#" id="whatsappLink">Enviar Comprovante no WhatsApp</a>
         </div>
     </div>
 
@@ -365,6 +401,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+        // Configuração exata do seu projeto
         const firebaseConfig = {
             apiKey: "AIzaSyBEMpB2pKJ9kukNrNbxfNGM0rs3pHbj990",
             authDomain: "rifa-cbjj.firebaseapp.com",
@@ -382,8 +419,8 @@
         const TOTAL_NUMEROS = 30;
         const NUMERO_INICIAL = 301;  
         const PRECO_UNITARIO = 10;
-        const CHAVE_PIX = "a959de09-484a-4336-b6b8-9e029a63963d"; // SUA CHAVE PIX
-        const WHATSAPP = "5586981178006"; // SEU WHATSAPP
+        const CHAVE_PIX = "a959de09-484a-4336-b6b8-9e029a63963d"; 
+        const WHATSAPP = "5586981178006"; 
 
         const grid = document.getElementById('rifaGrid');
         const loadingMsg = document.getElementById('loadingMsg');
@@ -399,7 +436,12 @@
 
         onValue(rifaRef, (snapshot) => {
             vendidosCache = snapshot.val() || {};
+            // Limpa seleções de números que acabaram de ser vendidos
+            selectedNumbers.forEach(num => {
+                if (vendidosCache.hasOwnProperty(num)) selectedNumbers.delete(num);
+            });
             renderizarGrid();
+            updateCheckoutBar();
             loadingMsg.style.display = 'none';
         });
 
@@ -428,7 +470,7 @@
                 if (!isSold) {
                     btn.onclick = () => toggleSelection(i);
                 } else {
-                    btn.onclick = () => alert(`Número ${i} já vendido para ${vendidosCache[i]}!`);
+                    btn.onclick = () => alert(`Número ${i} já foi vendido!`);
                 }
                 
                 grid.appendChild(btn);
@@ -441,8 +483,8 @@
             } else {
                 selectedNumbers.add(num);
             }
-            renderizarGrid(); // Atualiza cores
-            updateCheckoutBar(); // Atualiza barra
+            renderizarGrid(); // Re-renderiza para aplicar a classe 'selected'
+            updateCheckoutBar(); // Atualiza a barra inferior
         }
 
         function updateCheckoutBar() {
@@ -450,13 +492,14 @@
             if (count > 0) {
                 const total = count * PRECO_UNITARIO;
                 document.getElementById('totalValue').textContent = `R$ ${total},00`;
-                document.getElementById('totalCount').textContent = `${count} números`;
+                document.getElementById('totalCount').textContent = `${count} número${count > 1 ? 's' : ''}`;
                 checkoutBar.classList.add('visible');
             } else {
                 checkoutBar.classList.remove('visible');
             }
         }
 
+        // Abrir Modal ao clicar na barra
         checkoutBar.onclick = () => {
             const nums = Array.from(selectedNumbers).sort((a, b) => a - b);
             const total = nums.length * PRECO_UNITARIO;
@@ -465,20 +508,27 @@
             document.getElementById('modalTotalValue').textContent = `R$ ${total},00`;
             document.getElementById('pixKey').textContent = CHAVE_PIX;
 
-            // Link do WhatsApp
-            const msg = `Olá Emanoel! Quero os números: ${nums.join(', ')}. Total: R$ ${total},00. Segue o comprovante.`;
+            // Link do WhatsApp com mensagem pronta
+            const msg = `Olá! Quero comprar os números: ${nums.join(', ')} da Rifa CBJJ. O valor total é R$ ${total},00. Segue o comprovante!`;
             document.getElementById('whatsappLink').href = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}`;
 
             modal.style.display = 'flex';
         };
 
+        // Fechar Modal
         closeBtn.onclick = () => modal.style.display = 'none';
         window.onclick = (event) => { if (event.target == modal) modal.style.display = 'none'; }
         
+        // Copiar PIX
         copyBtn.onclick = () => { 
             navigator.clipboard.writeText(CHAVE_PIX).then(() => {
-                copyBtn.textContent = "Copiado!";
-                setTimeout(() => copyBtn.textContent = "Copiar Chave PIX", 2000);
+                const originalText = copyBtn.textContent;
+                copyBtn.textContent = "Copiado! ✅";
+                copyBtn.style.background = "#22c55e";
+                setTimeout(() => {
+                    copyBtn.textContent = originalText;
+                    copyBtn.style.background = "#3b82f6";
+                }, 2000);
             }); 
         }
     </script>
